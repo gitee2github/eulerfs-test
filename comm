@@ -1,0 +1,137 @@
+mount_eulerfs()
+{
+	modprobe eulerfs &> /dev/null
+
+	mount -t eulerfs $TEST_DEV $MNT_POINT -o init
+	return $?
+}
+
+mount_nova()
+{
+	modprobe nova &> /dev/null
+
+	mount -t NOVA $TEST_DEV $MNT_POINT -o init
+	return $?
+}
+
+mount_ext4()
+{
+	mkfs.ext4 -F $TEST_DEV &> /dev/null
+	if [ $? -ne 0 ]; then
+		return 1
+	fi
+
+	mount $TEST_DEV $MNT_POINT
+	return $?
+}
+
+mount_ext2dax()
+{
+	mkfs.ext2 -F $TEST_DEV &> /dev/null
+	if [ $? -ne 0 ]; then
+		return 1
+	fi
+
+	mount $TEST_DEV $MNT_POINT -o dax
+	return $?
+}
+
+mount_ext4dax()
+{
+	mkfs.ext4 -F $TEST_DEV &> /dev/null
+	if [ $? -ne 0 ]; then
+		return 1
+	fi
+
+	mount $TEST_DEV $MNT_POINT -o dax
+	return $?
+}
+
+mount_ext4dax_fc()
+{
+	mkfs.ext4 -F $TEST_DEV &> /dev/null
+	if [ $? -ne 0 ]; then
+		return 1
+	fi
+
+	tune2fs -O fast_commit $TEST_DEV
+	if [ $? -ne 0 ]; then
+		return 1
+	fi
+
+	mount $TEST_DEV $MNT_POINT -o dax
+	return $?
+}
+
+mount_ext4dax_nojournal()
+{
+	mkfs.ext4 -F $TEST_DEV &> /dev/null
+	if [ $? -ne 0 ]; then
+		return 1
+	fi
+
+	tune2fs -O ^has_journal $TEST_DEV
+	if [ $? -ne 0 ]; then
+		return 1
+	fi
+
+	mount $TEST_DEV $MNT_POINT -o dax
+	return $?
+}
+
+mount_xfsdax()
+{
+	mkfs.xfs -f -m reflink=0 $TEST_DEV &> /dev/null
+	if [ $? -ne 0 ]; then
+		return 1
+	fi
+
+	mount $TEST_DEV $MNT_POINT -o dax
+	return $?
+}
+
+# $1 fs
+__mount()
+{
+        case $1 in
+		eulerfs)
+			mount_eulerfs
+			ret=$?
+			;;
+		nova)
+			mount_nova
+			ret=$?
+			;;
+		ext4)
+			mount_ext4
+			ret=$?
+			;;
+		ext4dax)
+			mount_ext4dax
+			ret=$?
+			;;
+		ext2dax)
+			mount_ext2dax
+			ret=$?
+			;;
+		ext4dax-fc)
+			mount_ext4dax_fc
+			ret=$?
+			;;
+		ext4dax-nojournal)
+			mount_ext4dax_nojournal
+			ret=$?
+			;;
+		xfsdax)
+			mount_xfsdax
+			ret=$?
+			;;
+		\?)
+			echo "------ unknow fs $1 ------"
+			ret=1
+			;;
+        esac
+
+	return $ret
+}
+

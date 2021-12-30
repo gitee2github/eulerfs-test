@@ -1,7 +1,7 @@
 # eulerfs-test
 
 #### Description
-test scripts for eulerfs
+Eulrefs性能测试相关测试脚本
 
 #### Software Architecture
 Software architecture description

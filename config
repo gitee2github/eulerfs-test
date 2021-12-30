@@ -1,0 +1,2 @@
+TEST_DEV=/dev/pmem1
+MNT_POINT=/mnt/ramdisk
